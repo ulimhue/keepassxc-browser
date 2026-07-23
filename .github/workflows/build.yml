@@ -1,0 +1,35 @@
+name: Build Extension
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build -- --skip-translations
+
+      - name: Upload Firefox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: keepassxc-browser-firefox
+          path: keepassxc-browser_*_firefox.zip
+
+      - name: Upload Chromium artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: keepassxc-browser-chromium
+          path: keepassxc-browser_*_chromium.zip
