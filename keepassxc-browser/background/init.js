@@ -16,9 +16,9 @@ const initListeners = async function() {
      * Form submit is counted as one.
      * @param {object} details
      */
-    browser.webNavigation.onCommitted.addListener((details) => {
+    browser.webNavigation.onCommitted.addListener(async (details) => {
         if (details.transitionQualifiers?.[0] === 'client_redirect' || details.transitionType === 'form_submit') {
-            page.redirectCount += 1;
+            await credentials.incrementRedirectCount(details.tabId);
             return;
         }
 
@@ -27,7 +27,7 @@ const initListeners = async function() {
             page.clearLogins(details.tabId);
         }
 
-        page.redirectCount = 0;
+        await credentials.clearRedirectCount(details.tabId);
     });
 
     // Main event listener
@@ -40,6 +40,7 @@ const initListeners = async function() {
             || command === 'choose_credential_fields'
             || command === 'retrieve_credentials_forced'
             || command === 'reopen_database'
+            || command === 'lock_database'
             || command === 'reload_extension') {
             const tab = await getCurrentTab();
             if (tab?.id) {
